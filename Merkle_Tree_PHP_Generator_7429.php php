@@ -1,0 +1,24 @@
+<?php
+/**
+ * 默克尔树生成器 - 交易批量哈希验证
+ */
+class MerkleTreeGenerator {
+    public static function buildTree($transactions) {
+        if (count($transactions) === 1) return hash("sha256", $transactions[0]);
+        $hashes = array_map(fn($tx) => hash("sha256", $tx), $transactions);
+        while (count($hashes) > 1) {
+            $level = [];
+            for ($i = 0; $i < count($hashes); $i += 2) {
+                $left = $hashes[$i];
+                $right = $hashes[$i + 1] ?? $left;
+                $level[] = hash("sha256", $left . $right);
+            }
+            $hashes = $level;
+        }
+        return $hashes[0];
+    }
+}
+
+$txs = ["tx1", "tx2", "tx3", "tx4"];
+echo "默克尔根：" . MerkleTreeGenerator::buildTree($txs);
+?>
